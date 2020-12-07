@@ -70,16 +70,43 @@ namespace WindowExtensions
         }
 
         /// <summary>
+        /// Marks the window as transparent, ignoring all mouse events.
+        /// Mouse events are passed to the other windows underneath.
+        /// </summary>
+        /// <remarks>
+        /// This will add the <see cref="WindowStylesEx.WS_EX_LAYERED"/> style to the window, if the window is missing this style.
+        /// </remarks>
+        /// <param name="window">Window.</param>
+        public static void IgnoreMouseEvents(this Window window)
+        {
+            WindowStylesEx extendedWindowStyle = window.GetExtendedStyle();
+            extendedWindowStyle |= WindowStylesEx.WS_EX_LAYERED;
+            extendedWindowStyle |= WindowStylesEx.WS_EX_TRANSPARENT;
+            window.SetExtendedStyle(extendedWindowStyle);
+        }
+
+        /// <summary>
+        /// Removes the transparent style attribute from the window,
+        /// making it respond to mouse events again.
+        /// </summary>
+        /// <param name="window">Window.</param>
+        public static void StopIgnoreMouseEvents(this Window window)
+        {
+            WindowStylesEx extendedWindowStyle = window.GetExtendedStyle();
+            extendedWindowStyle &= ~WindowStylesEx.WS_EX_TRANSPARENT;
+            window.SetExtendedStyle(extendedWindowStyle);
+        }
+
+        /// <summary>
         /// Hides the window from the alt-tab menu.
         /// </summary>
         /// <param name="window">Window.</param>
         public static void HideFromAltTab(this Window window)
         {
-            IntPtr handle = window.GetHandle();
-            WindowStylesEx extendedWindowStyle = (WindowStylesEx)NativeMethods.GetWindowLongPtr(handle, WindowLongParam.GWL_EXSTYLE);
+            WindowStylesEx extendedWindowStyle = window.GetExtendedStyle();
             extendedWindowStyle &= ~WindowStylesEx.WS_EX_APPWINDOW;
             extendedWindowStyle |= WindowStylesEx.WS_EX_TOOLWINDOW;
-            NativeMethods.SetWindowLongPtr(new HandleRef(window, handle), WindowLongParam.GWL_EXSTYLE, (IntPtr)extendedWindowStyle);
+            window.SetExtendedStyle(extendedWindowStyle);
         }
 
         /// <summary>
@@ -89,9 +116,9 @@ namespace WindowExtensions
         /// <param name="window">Window.</param>
         public static void DisableWindowMaximize(this Window window)
         {
-            WindowStyles windowStyle = (WindowStyles)NativeMethods.GetWindowLongPtr(window.GetHandle(), WindowLongParam.GWL_STYLE);
+            WindowStyles windowStyle = window.GetStyle();
             windowStyle &= ~WindowStyles.WS_MAXIMIZEBOX;
-            NativeMethods.SetWindowLongPtr(new HandleRef(window, window.GetHandle()), WindowLongParam.GWL_STYLE, (IntPtr)windowStyle);
+            window.SetStyle(windowStyle);
         }
 
         /// <summary>
@@ -109,7 +136,7 @@ namespace WindowExtensions
 
         /// <summary>
         /// Disables window activation caused by change in size, position, z-index and mouse events.
-        /// Also disabled activation on mouse events and on calls to Activate().
+        /// Also disables activation on mouse events and on calls to <see cref="Window.Activate"/>.
         /// </summary>
         /// <param name="window">Window.</param>
         /// <returns>A boolean indicating whether the operation completed successfully or not.</returns>
@@ -125,6 +152,24 @@ namespace WindowExtensions
             window.Closed += WindowClosed;
             return true;
         }
+
+        private static WindowStyles GetStyle(this Window window)
+            => GetStyle( window.GetHandle());
+
+        private static WindowStyles GetStyle(IntPtr handle)
+            => (WindowStyles)NativeMethods.GetWindowLongPtr(handle, WindowLongParam.GWL_STYLE);
+
+        private static WindowStylesEx GetExtendedStyle(this Window window)
+            => GetExtendedStyle(window.GetHandle());
+
+        private static WindowStylesEx GetExtendedStyle(IntPtr handle)
+            => (WindowStylesEx)NativeMethods.GetWindowLongPtr(handle, WindowLongParam.GWL_EXSTYLE);
+
+        private static IntPtr SetStyle(this Window window, WindowStyles style)
+            => NativeMethods.SetWindowLongPtr(new HandleRef(window, window.GetHandle()), WindowLongParam.GWL_STYLE, (IntPtr)style);
+
+        private static IntPtr SetExtendedStyle(this Window window, WindowStylesEx extendedStyle)
+            => NativeMethods.SetWindowLongPtr(new HandleRef(window, window.GetHandle()), WindowLongParam.GWL_EXSTYLE, (IntPtr)extendedStyle);
 
         private static void WindowClosed(object? sender, EventArgs e)
         {
