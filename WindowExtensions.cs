@@ -34,12 +34,6 @@ namespace WindowExtensions
     /// </summary>
     public static class WindowExtensions
     {
-#pragma warning disable SA1310 // Field names should not contain underscore
-        private const int WA_INACTIVE = 0;
-        private const int WA_ACTIVE = 1;
-        private const int WA_CLICKACTIVE = 2;
-#pragma warning restore SA1310 // Field names should not contain underscore
-
         /// <summary>
         /// Get the window handle for this window.
         /// </summary>
@@ -114,11 +108,22 @@ namespace WindowExtensions
         /// and prevents the window from being brought to a maximized state.
         /// </summary>
         /// <param name="window">Window.</param>
+        /// <remarks>Setting the <see cref="Window.ResizeMode"/> property to <see cref="ResizeMode.CanResize"/> or <see cref="ResizeMode.CanResizeWithGrip"/> will override this setting. </remarks>
         public static void DisableWindowMaximize(this Window window)
+            => DisableWindowMaximize(window, false);
+
+        /// <inheritdoc cref="DisableWindowMaximize(Window)"/>
+        /// <param name="overrideWPF">A value indicating whether all WPF attempts to enable maximizebox should be discarded.
+        /// Set to true to override WPF.</param>
+        public static void DisableWindowMaximize(this Window window, bool overrideWPF)
         {
             WindowStyles windowStyle = window.GetStyle();
             windowStyle &= ~WindowStyles.WS_MAXIMIZEBOX;
             window.SetStyle(windowStyle);
+            if (overrideWPF && window.GetHandleSource() is HwndSource source)
+            {
+                source.AddHook(SourceHooks.WndCreateResizibilityOverride);
+            }
         }
 
         /// <summary>
@@ -130,7 +135,7 @@ namespace WindowExtensions
         {
             if (window.GetHandleSource() is HwndSource source)
             {
-                source.RemoveHook(WndProc);
+                source.RemoveHook(SourceHooks.WndActivationProc);
             }
         }
 
@@ -148,7 +153,7 @@ namespace WindowExtensions
                 return false;
             }
 
-            source.AddHook(WndProc);
+            source.AddHook(SourceHooks.WndActivationProc);
             window.Closed += WindowClosed;
             return true;
         }
@@ -183,43 +188,5 @@ namespace WindowExtensions
 
         private static HwndSource? GetHandleSource(this Window window)
             => PresentationSource.FromVisual(window) as HwndSource;
-
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Style", "IDE0059:Unnecessary assignment of a value", Justification = "Pointer to obj.")]
-        private static IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
-        {
-            // Handle messages...
-            WM message = (WM)msg;
-            IntPtr result = IntPtr.Zero;
-
-            switch (message)
-            {
-                case WM.ACTIVATE:
-                    if ((int)lParam != WA_INACTIVE)
-                    {
-                        // Discard all activation events
-                        handled = true;
-                    }
-
-                    break;
-                case WM.MOUSEACTIVATE:
-                    // Don't activate window on mouse.
-                    result = (IntPtr)MouseActivate.MA_NOACTIVATE;
-                    handled = true;
-                    break;
-                case WM.WINDOWPOSCHANGING:
-                case WM.WINDOWPOSCHANGED:
-                    // Ensure z-index is bottom on all move events.
-                    WINDOWPOS windowPos = default;
-                    windowPos = Marshal.PtrToStructure<WINDOWPOS>(lParam);
-                    windowPos.hwndInsertAfter = HWNDInsertAfter.Bottom;
-                    Marshal.StructureToPtr(windowPos, lParam, true);
-                    handled = false; // Allow WPF to consume event. This is needed to update Window.Top, Window.Left, etc.
-                    break;
-                default:
-                    break;
-            }
-
-            return result;
-        }
     }
 }

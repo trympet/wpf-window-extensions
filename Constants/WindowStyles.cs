@@ -111,5 +111,10 @@ namespace WindowExtensions
 
         /// <summary>The window has a vertical scroll bar.</summary>
         WS_VSCROLL = 0x200000,
+
+        /// <summary>
+        /// The window has a sizing border. Same as the WS_SIZEBOX style.
+        /// </summary>
+        WS_THICKFRAME = 0x40000,
     }
 }
