@@ -159,7 +159,7 @@ namespace WindowExtensions
         }
 
         private static WindowStyles GetStyle(this Window window)
-            => GetStyle( window.GetHandle());
+            => GetStyle(window.GetHandle());
 
         private static WindowStyles GetStyle(IntPtr handle)
             => (WindowStyles)NativeMethods.GetWindowLongPtr(handle, WindowLongParam.GWL_STYLE);
