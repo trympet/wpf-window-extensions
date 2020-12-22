@@ -158,6 +158,25 @@ namespace WindowExtensions
             return true;
         }
 
+        /// <summary>
+        /// Retrieve information about the display monitor for this window.
+        /// </summary>
+        /// <param name="window">Window of interest.</param>
+        /// <param name="defaultWindow">Determines the function's return value if the window does not intersect any display monitor.</param>
+        /// <returns>Monitor info for the specified window.</returns>
+        public static MonitorInfo GetMonitorInfo(this Window window, DefaultWindow defaultWindow)
+        {
+            IntPtr monitorHandle = NativeMethods.MonitorFromWindow(window.GetHandle(), defaultWindow);
+            MonitorInfo monitorInfo = default;
+            monitorInfo.Init(); // This MUST be invoked.
+            if (!NativeMethods.GetMonitorInfo(monitorHandle, ref monitorInfo))
+            {
+                Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
+            }
+
+            return monitorInfo;
+        }
+
         private static WindowStyles GetStyle(this Window window)
             => GetStyle(window.GetHandle());
 

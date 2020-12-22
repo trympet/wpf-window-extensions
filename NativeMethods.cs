@@ -57,6 +57,12 @@ namespace WindowExtensions
         [DllImport("user32.dll", SetLastError = true)]
         public static extern IntPtr SetActiveWindow(IntPtr hWnd);
 
+        [DllImport("user32.dll")]
+        public static extern IntPtr MonitorFromWindow(IntPtr hwnd, DefaultWindow dwFlags);
+
+        [DllImport("user32.dll", SetLastError = true)]
+        public static extern bool GetMonitorInfo(IntPtr hMonitor, ref MonitorInfo lpmi);
+
         [DllImport("user32.dll", EntryPoint = "GetWindowLong")]
         private static extern IntPtr GetWindowLongPtr32(IntPtr hWnd, int nIndex);
 
