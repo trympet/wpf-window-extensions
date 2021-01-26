@@ -23,9 +23,11 @@
 // </copyright>
 
 using System;
+using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
+using System.Windows.Media;
 
 namespace WindowExtensions
 {
@@ -95,11 +97,29 @@ namespace WindowExtensions
         /// Hides the window from the alt-tab menu.
         /// </summary>
         /// <param name="window">Window.</param>
+        /// <remarks>
+        /// This will prevent WPF from resizing the window if the resolution or display arrangement changes.
+        /// </remarks>
         public static void HideFromAltTab(this Window window)
         {
             WindowStylesEx extendedWindowStyle = window.GetExtendedStyle();
             extendedWindowStyle &= ~WindowStylesEx.WS_EX_APPWINDOW;
             extendedWindowStyle |= WindowStylesEx.WS_EX_TOOLWINDOW;
+            window.SetExtendedStyle(extendedWindowStyle);
+        }
+
+        /// <summary>
+        /// Hides the window from the alt-tab menu.
+        /// </summary>
+        /// <param name="window">Window.</param>
+        /// <remarks>
+        /// This will prevent WPF from resizing the window if the resolution or display arrangement changes.
+        /// </remarks>
+        public static void ShowInAltTab(this Window window)
+        {
+            WindowStylesEx extendedWindowStyle = window.GetExtendedStyle();
+            extendedWindowStyle &= ~WindowStylesEx.WS_EX_TOOLWINDOW;
+            extendedWindowStyle |= WindowStylesEx.WS_EX_APPWINDOW;
             window.SetExtendedStyle(extendedWindowStyle);
         }
 
@@ -163,18 +183,75 @@ namespace WindowExtensions
         /// </summary>
         /// <param name="window">Window of interest.</param>
         /// <param name="defaultWindow">Determines the function's return value if the window does not intersect any display monitor.</param>
+        /// <param name="monitorInfo">Result. Empty when the method returns false.</param>
         /// <returns>Monitor info for the specified window.</returns>
-        public static MonitorInfo GetMonitorInfo(this Window window, DefaultWindow defaultWindow)
+#if NET451
+        public static bool TryGetMonitorInfo(this Window window, DefaultWindow defaultWindow, out MonitorInfo monitorInfo)
+#else
+        public static bool TryGetMonitorInfo(this Window window, DefaultWindow defaultWindow, [System.Diagnostics.CodeAnalysis.MaybeNullWhen(true)] out MonitorInfo monitorInfo)
+#endif
         {
+            monitorInfo = default;
             IntPtr monitorHandle = NativeMethods.MonitorFromWindow(window.GetHandle(), defaultWindow);
-            MonitorInfo monitorInfo = default;
-            monitorInfo.Init(); // This MUST be invoked.
-            if (!NativeMethods.GetMonitorInfo(monitorHandle, ref monitorInfo))
+            if (monitorHandle == IntPtr.Zero)
             {
-                Marshal.ThrowExceptionForHR(Marshal.GetHRForLastWin32Error());
+                return false;
             }
 
-            return monitorInfo;
+            monitorInfo.Init(); // This MUST be invoked.
+            return NativeMethods.GetMonitorInfo(monitorHandle, ref monitorInfo);
+        }
+
+        /// <summary>
+        /// Gets the scale for the current display.
+        /// </summary>
+        /// <remarks>
+        /// Consider using the <see cref="CompositionTarget.TransformToDevice"/> matrix, provided by <see cref="PresentationSource.CompositionTarget"/> instead.
+        /// </remarks>
+        /// <param name="window">Window.</param>
+        /// <param name="defaultWindow">Determines the function's return value if the window does not intersect any display monitor.</param>
+        /// <returns>The device scale factor.</returns>
+        public static double? GetScaleFactorForCurrentMonitor(this Window window, DefaultWindow defaultWindow)
+        {
+            IntPtr monitorHandle = NativeMethods.MonitorFromWindow(window.GetHandle(), defaultWindow);
+            int scaleFactor = 1;
+            var hResult = NativeMethods.GetScaleFactorForMonitor(monitorHandle, ref scaleFactor);
+            return scaleFactor / 100;
+        }
+
+        /// <summary>
+        /// Obtain information on a display monitor associated with this window.
+        /// </summary>
+        /// <param name="window">Window of interest.</param>
+        /// <param name="defaultWindow">Determines the function's return value if the window does not intersect any display monitor.</param>
+        /// <param name="displayDevice">Display information for selected display.</param>
+        /// <returns>Information about the display device.</returns>
+        /// <exception cref="COMException">Win32 error.</exception>
+#if NET451
+        public static bool TryGetDisplayInfo(this Window window, DefaultWindow defaultWindow, out DisplayDevice displayDevice)
+#else
+        public static bool TryGetDisplayInfo(this Window window, DefaultWindow defaultWindow, [System.Diagnostics.CodeAnalysis.MaybeNullWhen(true)] out DisplayDevice displayDevice)
+#endif
+        {
+            displayDevice = default;
+            if (window.TryGetMonitorInfo(defaultWindow, out MonitorInfo monitorInfo))
+            {
+                displayDevice.Init();
+                return NativeMethods.EnumDisplayDevices(monitorInfo.DeviceName, 0, ref displayDevice, 1);
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Changes the size and position of the window, in client coordinates.
+        /// </summary>
+        /// <param name="window">The window of interest.</param>
+        /// <param name="position">The position of the window, in pixels, relative to the primary display.</param>
+        public static void SetWindowPosition(this Window window, Rectangle position)
+        {
+            var handle = window.GetHandle();
+            NativeMethods.SetWindowPos(handle, IntPtr.Zero, position.X, position.Y, position.Width, position.Height, SetWindowPosFlags.SWP_FRAMECHANGED | SetWindowPosFlags.SWP_NOZORDER);
         }
 
         private static WindowStyles GetStyle(this Window window)
