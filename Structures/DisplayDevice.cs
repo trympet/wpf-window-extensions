@@ -22,12 +22,7 @@
 // SOFTWARE.
 // </copyright>
 
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace WindowExtensions
 {
@@ -35,7 +30,6 @@ namespace WindowExtensions
     /// The DISPLAY_DEVICE structure receives information about the display device specified by the iDevNum parameter of the EnumDisplayDevices function.
     /// </summary>
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
-    [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.NamingRules", "SA1307:Accessible fields should begin with upper-case letter", Justification = "Win API.")]
     [System.Diagnostics.CodeAnalysis.SuppressMessage("StyleCop.CSharp.OrderingRules", "SA1202:Elements should be ordered by access", Justification = "Sequential.")]
     public struct DisplayDevice
     {
