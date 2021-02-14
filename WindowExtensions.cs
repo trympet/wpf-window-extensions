@@ -147,15 +147,15 @@ namespace WindowExtensions
         }
 
         /// <summary>
-        /// Reenables window activation, if it has been disabled by <see cref="DisableWindowMaximize(Window)"/>.
-        /// Call this method to revert window activation behavior to its default state.
+        /// Reenables window maximize, if it has been disabled by <see cref="DisableWindowMaximize(Window)"/>.
+        /// Call this method to revert window shell to its default state.
         /// </summary>
         /// <param name="window">Window.</param>
-        public static void ReenableWindowActivation(this Window window)
+        public static void ReenableWindowMaximize(this Window window)
         {
             if (window.GetHandleSource() is HwndSource source)
             {
-                source.RemoveHook(SourceHooks.WndActivationProc);
+                source.RemoveHook(SourceHooks.WndCreateResizibilityOverride);
             }
         }
 
@@ -176,6 +176,19 @@ namespace WindowExtensions
             source.AddHook(SourceHooks.WndActivationProc);
             window.Closed += WindowClosed;
             return true;
+        }
+
+        /// <summary>
+        /// Reenables window activation, if it has been disabled by <see cref="DisableWindowActivation(Window)"/>.
+        /// Call this method to revert window activation behavior to its default state.
+        /// </summary>
+        /// <param name="window">Window.</param>
+        public static void ReenableWindowActivation(this Window window)
+        {
+            if (window.GetHandleSource() is HwndSource source)
+            {
+                source.RemoveHook(SourceHooks.WndActivationProc);
+            }
         }
 
         /// <summary>
@@ -215,7 +228,7 @@ namespace WindowExtensions
         {
             IntPtr monitorHandle = NativeMethods.MonitorFromWindow(window.GetHandle(), defaultWindow);
             int scaleFactor = 1;
-            var hResult = NativeMethods.GetScaleFactorForMonitor(monitorHandle, ref scaleFactor);
+            _ = NativeMethods.GetScaleFactorForMonitor(monitorHandle, ref scaleFactor);
             return scaleFactor / 100;
         }
 
