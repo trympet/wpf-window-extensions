@@ -229,7 +229,7 @@ namespace WindowExtensions
             IntPtr monitorHandle = NativeMethods.MonitorFromWindow(window.GetHandle(), defaultWindow);
             int scaleFactor = 1;
             _ = NativeMethods.GetScaleFactorForMonitor(monitorHandle, ref scaleFactor);
-            return scaleFactor / 100;
+            return scaleFactor / 100d;
         }
 
         /// <summary>
