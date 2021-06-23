@@ -54,7 +54,7 @@ namespace WindowExtensions
         /// Sets the transparency level of the window.
         /// </summary>
         /// <param name="window">The window.</param>
-        /// <param name="transparencyLevel">The level of transparency to use</param>
+        /// <param name="transparencyLevel">The level of transparency to use. <see cref="WindowBlurLevel.AcrylicBlur"/> is only supported on build >= 19628.</param>
         /// <param name="a">Blur background opacity.</param>
         /// <param name="r">Blur background red.</param>
         /// <param name="g">Blur background green.</param>
