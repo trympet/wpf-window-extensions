@@ -198,8 +198,6 @@ namespace WindowExtensions
             data.SizeOfData = accentStructSize;
             data.Data = accentPtr;
 
-            int ncrp = (int)DWMNCRENDERINGPOLICY.DWMNCRP_DISABLED;
-            var hr = NativeMethods.DwmSetWindowAttribute(handle, DWMWINDOWATTRIBUTE.NCRenderingPolicy, ref ncrp, Marshal.SizeOf(ncrp));
             NativeMethods.SetWindowCompositionAttribute(handle, ref data);
 
             Marshal.FreeHGlobal(accentPtr);
