@@ -23,6 +23,7 @@
 // </copyright>
 
 using System;
+using System.ComponentModel;
 using System.Runtime.InteropServices;
 
 namespace WindowExtensions
@@ -68,6 +69,41 @@ namespace WindowExtensions
 
         [DllImport("shcore.dll")]
         public static extern int GetScaleFactorForMonitor(IntPtr hMon, ref int pScale);
+
+        [DllImport("user32.dll")]
+        public static extern int SetWindowRgn(IntPtr hWnd, IntPtr hRgn, bool bRedraw);
+
+        [DllImport("gdi32.dll")]
+        public static extern IntPtr CreateRoundRectRgn(int x1, int y1, int x2, int y2, int cx, int cy);
+
+        [DllImport("dwmapi.dll")]
+        public static extern void DwmEnableBlurBehindWindow(IntPtr hwnd, ref DWM_BLURBEHIND blurBehind);
+
+        [DllImport("dwmapi.dll", PreserveSig = true)]
+        public static extern int DwmSetWindowAttribute(IntPtr hwnd, DWMWINDOWATTRIBUTE attr, ref int attrValue, int attrSize);
+
+        [DllImport("user32.dll")]
+        public static extern int SetWindowCompositionAttribute(IntPtr hwnd, ref WindowCompositionAttributeData data);
+
+        [DllImport("dwmapi.dll")]
+        public static extern int DwmIsCompositionEnabled(out bool enabled);
+
+        public static Version RtlGetVersion()
+        {
+            RTL_OSVERSIONINFOEX v = default;
+            v.dwOSVersionInfoSize = (uint)Marshal.SizeOf(v);
+            if (RtlGetVersion(ref v) == 0)
+            {
+                return new Version((int)v.dwMajorVersion, (int)v.dwMinorVersion, (int)v.dwBuildNumber);
+            }
+            else
+            {
+                throw new Win32Exception("RtlGetVersion failed!");
+            }
+        }
+
+        [DllImport("ntdll")]
+        private static extern int RtlGetVersion(ref RTL_OSVERSIONINFOEX lpVersionInformation);
 
         [DllImport("user32.dll", EntryPoint = "GetWindowLong")]
         private static extern IntPtr GetWindowLongPtr32(IntPtr hWnd, int nIndex);

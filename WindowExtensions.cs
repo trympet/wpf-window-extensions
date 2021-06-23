@@ -23,7 +23,6 @@
 // </copyright>
 
 using System;
-using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows;
 using System.Windows.Interop;
@@ -139,6 +138,16 @@ namespace WindowExtensions
             }
 
             return false;
+        }
+
+        private static IntPtr AssertNotZero(this IntPtr intPtr)
+        {
+            if (intPtr != IntPtr.Zero)
+            {
+                return intPtr;
+            }
+
+            throw new InvalidOperationException("Window is not initialized.");
         }
 
         private static void WindowClosed(object? sender, EventArgs e)

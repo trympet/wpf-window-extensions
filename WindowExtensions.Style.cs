@@ -1,4 +1,4 @@
-﻿// <copyright file="WindowExtensions.cs" company="Flogard Services">
+﻿// <copyright file="WindowExtensions.Style.cs" company="Flogard Services">
 // The MIT License (MIT)
 //
 // Copyright (c) 2020 Trym Lund Flogard and contributors
@@ -126,6 +126,11 @@ namespace WindowExtensions
             {
                 source.RemoveHook(SourceHooks.WndCreateResizibilityOverride);
             }
+        }
+
+        public static void SetWindowRadius(this Window window, int radius)
+        {
+            NativeMethods.SetWindowRgn(window.GetHandle(), NativeMethods.CreateRoundRectRgn(0, 0, 300, 300, 16, 16), true);
         }
 
         private static WindowStyles GetStyle(this Window window)

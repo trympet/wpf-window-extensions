@@ -28,16 +28,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="WindowExtensions.Position.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Remove="stylecop.json" />
     <None Include="LICENSE.md">
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
-    <None Include="WindowExtensions.Position.cs" />
   </ItemGroup>
 
   <ItemGroup>
