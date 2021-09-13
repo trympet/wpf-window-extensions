@@ -95,6 +95,7 @@ namespace WindowExtensions
 
         internal static IntPtr AeroSnapHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
         {
+            // See https://stackoverflow.com/questions/19661126/win32-prevent-window-snap
             const int SC_DRAGMOVE = 0xF012;
             const int SC_SIZE = 0xF000;
             const WM WM_RESTOREORIGINALSTYLE = (WM)((uint)WM.USER + 0x0001);
