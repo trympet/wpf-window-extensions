@@ -86,7 +86,7 @@ namespace WindowExtensions
         /// </summary>
         internal void Init()
         {
-            this.Size = Marshal.SizeOf(this);
+            Size = Marshal.SizeOf(this);
         }
     }
 }
