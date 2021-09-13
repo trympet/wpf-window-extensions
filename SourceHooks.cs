@@ -92,5 +92,41 @@ namespace WindowExtensions
 
             return result;
         }
+
+        internal static IntPtr AeroSnapHook(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+        {
+            const int SC_DRAGMOVE = 0xF012;
+            const int SC_SIZE = 0xF000;
+            const WM WM_RESTOREORIGINALSTYLE = (WM)((uint)WM.USER + 0x0001);
+            WM message = (WM)msg;
+
+            if (message == WM.SYSCOMMAND)
+            {
+                if ((long)wParam == SC_DRAGMOVE)
+                {
+                    wParam = new IntPtr(SC_SIZE | 9);
+                }
+
+                // handle MOVE and SIZE
+                if (((long)wParam & 0xFFE0) == SC_SIZE && ((long)wParam & 0x000F) > 0)
+                {
+                    var stylePtr = NativeMethods.GetWindowLongPtr(hwnd, WindowLongParam.GWL_STYLE);
+                    NativeMethods.PostMessage(hwnd, WM_RESTOREORIGINALSTYLE, new IntPtr((int)WindowLongParam.GWL_STYLE), stylePtr);
+
+                    var style = (WindowStyles)stylePtr;
+                    style &= ~(WindowStyles.WS_MAXIMIZE | WindowStyles.WS_MAXIMIZEBOX);
+                    NativeMethods.SetWindowLongPtr(new HandleRef(null, hwnd), WindowLongParam.GWL_STYLE, (IntPtr)style);
+                }
+            }
+            else if (message == WM_RESTOREORIGINALSTYLE)
+            {
+                if ((WindowLongParam)wParam == WindowLongParam.GWL_STYLE)
+                {
+                    NativeMethods.SetWindowLongPtr(new HandleRef(null, hwnd), WindowLongParam.GWL_STYLE, lParam);
+                }
+            }
+
+            return IntPtr.Zero;
+        }
     }
 }

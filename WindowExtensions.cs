@@ -140,6 +140,36 @@ namespace WindowExtensions
             return false;
         }
 
+        /// <summary>
+        /// Disables the "snap" to maximize gesture.
+        /// </summary>
+        /// <param name="window">Window of interest.</param>
+        /// <returns>True upon success.</returns>
+        public static bool DisableAeroSnap(this Window window)
+        {
+            var source = window.GetHandleSource();
+            if (source is null)
+            {
+                return false;
+            }
+
+            source.AddHook(SourceHooks.AeroSnapHook);
+            return true;
+        }
+
+        /// <summary>
+        /// Reenables aero snap, if it has been disabled by <see cref="DisableAeroSnap(Window)"/>.
+        /// Call this method to revert the aero snap behavior to its default state.
+        /// </summary>
+        /// <param name="window">Window of interest.</param>
+        public static void ReenableAeroSnap(this Window window)
+        {
+            if (window.GetHandleSource() is HwndSource source)
+            {
+                source.RemoveHook(SourceHooks.AeroSnapHook);
+            }
+        }
+
         private static IntPtr AssertNotZero(this IntPtr intPtr)
         {
             if (intPtr != IntPtr.Zero)

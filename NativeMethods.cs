@@ -102,6 +102,10 @@ namespace WindowExtensions
             }
         }
 
+        [DllImport("User32", ExactSpelling = true, EntryPoint = "PostMessageW", SetLastError = true)]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+        internal static extern bool PostMessage(IntPtr hWnd, WM Msg, IntPtr wParam, IntPtr lParam);
+
         [DllImport("ntdll")]
         private static extern int RtlGetVersion(ref RTL_OSVERSIONINFOEX lpVersionInformation);
 
