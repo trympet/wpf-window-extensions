@@ -108,7 +108,7 @@ namespace WindowExtensions
         /// <param name="window">Window.</param>
         /// <param name="defaultWindow">Determines the function's return value if the window does not intersect any display monitor.</param>
         /// <returns>The device scale factor.</returns>
-        /// <seealso cref="GetDpiForCurrentMonitor"/>
+        /// <seealso cref="TryGetDpiForCurrentMonitor(Window, DefaultWindow, out Interop.DpiScale)"/>
         public static double? GetScaleFactorForCurrentMonitor(this Window window, DefaultWindow defaultWindow)
         {
             IntPtr monitorHandle = NativeMethods.MonitorFromWindow(window.GetHandle(), defaultWindow);
