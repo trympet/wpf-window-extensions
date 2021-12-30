@@ -70,6 +70,13 @@ namespace WindowExtensions
         [DllImport("shcore.dll")]
         public static extern int GetScaleFactorForMonitor(IntPtr hMon, ref int pScale);
 
+        public static int GetDpiForMonitor(IntPtr hMonitor, MonitorDpiType dpiType, out Interop.DpiScale dpi)
+        {
+            var result = GetDpiForMonitor(hMonitor, dpiType, out var x, out var y);
+            dpi = new Interop.DpiScale(x, y);
+            return result;
+        }
+
         [DllImport("user32.dll")]
         public static extern int SetWindowRgn(IntPtr hWnd, IntPtr hRgn, bool bRedraw);
 
@@ -120,5 +127,9 @@ namespace WindowExtensions
 
         [DllImport("user32.dll", EntryPoint = "SetWindowLongPtr")]
         private static extern IntPtr SetWindowLongPtr64(HandleRef hWnd, int nIndex, IntPtr dwNewLong);
+
+        [DllImport("api-ms-win-shcore-scaling-l1-1-1", ExactSpelling = true)]
+        [DefaultDllImportSearchPaths(DllImportSearchPath.System32)]
+        private static extern int GetDpiForMonitor(IntPtr hMonitor, MonitorDpiType dpiType, out uint dpiX, out uint dpiY);
     }
 }

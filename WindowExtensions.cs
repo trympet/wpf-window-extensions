@@ -108,12 +108,35 @@ namespace WindowExtensions
         /// <param name="window">Window.</param>
         /// <param name="defaultWindow">Determines the function's return value if the window does not intersect any display monitor.</param>
         /// <returns>The device scale factor.</returns>
+        /// <seealso cref="GetDpiForCurrentMonitor"/>
         public static double? GetScaleFactorForCurrentMonitor(this Window window, DefaultWindow defaultWindow)
         {
             IntPtr monitorHandle = NativeMethods.MonitorFromWindow(window.GetHandle(), defaultWindow);
             int scaleFactor = 1;
             _ = NativeMethods.GetScaleFactorForMonitor(monitorHandle, ref scaleFactor);
             return scaleFactor / 100d;
+        }
+
+        /// <summary>
+        /// Gets the DPI for the current display.
+        /// </summary>
+        /// <remarks>
+        /// Consider using the <see cref="CompositionTarget.TransformToDevice"/> matrix, provided by <see cref="PresentationSource.CompositionTarget"/> instead.
+        /// </remarks>
+        /// <param name="window">Window.</param>
+        /// <param name="defaultWindow">Determines the function's return value if the window does not intersect any display monitor.</param>
+        /// <param name="dpiScale">The dpi scale for the current monitor.</param>
+        /// <returns>True if the function succeeded.</returns>
+        public static bool TryGetDpiForCurrentMonitor(this Window window, DefaultWindow defaultWindow, out Interop.DpiScale dpiScale)
+        {
+            IntPtr hMonitor = NativeMethods.MonitorFromWindow(window.GetHandle(), defaultWindow);
+            if (hMonitor != IntPtr.Zero && NativeMethods.GetDpiForMonitor(hMonitor, MonitorDpiType.MDT_EFFECTIVE_DPI, out dpiScale) == 0)
+            {
+                return true;
+            }
+
+            dpiScale = default;
+            return false;
         }
 
         /// <summary>
