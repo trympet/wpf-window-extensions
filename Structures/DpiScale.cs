@@ -81,7 +81,7 @@ namespace WindowExtensions.Interop
         public readonly double PixelsPerInchY => dotsPerInchY;
 #if NET5_0_OR_GREATER
 
-        public static implicit operator System.Windows.DpiScale(DpiScale x) => new System.Windows.DpiScale(x.dotsPerInchX, x.dotsPerInchY);
+        public static implicit operator System.Windows.DpiScale(DpiScale x) => new System.Windows.DpiScale(x.DpiScaleX, x.DpiScaleY);
 
         public static implicit operator DpiScale(System.Windows.DpiScale x) => new DpiScale(x);
 #endif
